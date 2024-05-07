@@ -1,0 +1,795 @@
+---------------------------------------------------------------------
+LAB 1 1D PARITY CHECK
+---------------------------------------------------------------------
+#include <stdio.h>
+int main()
+{
+    int row,col,i,j,array[10][10];
+    printf("Enter the number of rows");//3
+    scanf("%d",&row);
+    printf("Enter the number of column");//3
+    scanf("%d",&col);
+    printf("Enter the bit stream:");//1 0 1,0 1 0,1 1 1
+    for(i=0;i<row;i++)
+    {
+        for(j=0;j<col;j++)
+        {
+            scanf("%d",&array[i][j]);
+    }
+   
+}
+    printf("Input bit stream:\n");
+    for(i=0;i<row;i++)
+    {
+        for(j=0;j<col;j++)
+        {
+            printf("%d",array[i][j]);
+           
+        }
+        printf("\n");
+    }
+    int count=0;
+    for(i=0;i<row;i++)//row wise parity check
+    {
+        for(j=0;j<col;j++)
+        {
+            if(array[i][j]==1)
+                count++;
+        }
+        if(count%2==0)
+            array[i][col]=0;
+        else
+            array[i][col]=1;
+        count=0;
+    }
+    //column wise parity check
+    for(i=0;i<row;i++)
+    {
+        for(j=0;j<col;j++)
+        {
+          if(array[i][j]==1)
+            count++;  
+        }
+        if(count%2==0)
+            array[row][j]=0;
+        else
+            array[row][j]=1;
+        count=0;
+    }
+    //output bit stream
+    printf("Output bit stream:\n");
+    for(i=0;i<row;i++)
+    {
+        for(j=0;j<col;j++)
+        {
+            printf("%d",array[i][j]);
+        }
+        printf("\n");
+    }
+       
+    }
+
+input 
+3
+3
+1 0 1,0 1 0,1 1 1
+
+---------------------------------------------------------------------
+LAB 1 2D PARITY CHECK
+---------------------------------------------------------------------
+#include <stdio.h>
+
+int main() {
+    int row, col, i, j, array[10][10];
+
+    printf("Enter the number of rows: "); // Corrected the prompt
+    scanf("%d", &row);
+
+    printf("Enter the number of columns: "); // Corrected the prompt
+    scanf("%d", &col);
+
+    printf("Enter the bit stream (separated by spaces): ");
+    for (i = 0; i < row; i++) {
+        for (j = 0; j < col; j++) {
+            scanf("%d", &array[i][j]);
+        }
+    }
+
+    printf("Input bit stream:\n");
+    for (i = 0; i < row; i++) {
+        for (j = 0; j < col; j++) {
+            printf("%d ", array[i][j]); // Added space for better readability
+        }
+        printf("\n");
+    }
+
+    int count = 0;
+
+    // Row-wise parity check
+    for (i = 0; i < row; i++) {
+        for (j = 0; j < col; j++) {
+            if (array[i][j] == 1)
+                count++;
+        }
+        if (count % 2 == 0)
+            array[i][col] = 0;
+        else
+            array[i][col] = 1;
+        count = 0;
+    }
+
+    // Column-wise parity check
+    for (j = 0; j < col; j++) {
+        for (i = 0; i < row; i++) {
+            if (array[i][j] == 1)
+                count++;
+        }
+        if (count % 2 == 0)
+            array[row][j] = 0;
+        else
+            array[row][j] = 1;
+        count = 0;
+    }
+
+    // Output bit stream
+    printf("Output bit stream:\n");
+    for (i = 0; i <= row; i++) { // Changed condition from i < row to i <= row
+        for (j = 0; j <= col; j++) { // Changed condition from j < col to j <= col
+            printf("%d ", array[i][j]); // Added space for better readability
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+
+input 
+
+Enter the number of rows: 3
+Enter the number of columns: 4 
+Enter the bit stream (separated by spaces): 1 0 1 0,1 1 0 1,0 0 1 1
+
+---------------------------------------------------------------------
+LAB 2 ERROR DETECTION USING CRC
+---------------------------------------------------------------------
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define POLYLEN strlen(gen_poly)
+
+char data[64], rem[32];
+char gen_poly[] = "", poly10[] = "11000110101", poly16[] = "10001000000100001";
+char poly8[] = "100000111", poly32[] = "100000001000000010010000111000110";
+int data_len, i, j, k, e, c, ch;
+
+void chooseGeneratingPolynomial(){
+    printf("\n Press 1 for CRC-8"
+            "\n Press 2 for CRC-10"
+            "\n Press 3 for CRC-16"
+            "\n Press 4 for CRC-32"
+            "\n Choice: ");
+    scanf("%d", &ch);
+
+    switch(ch){
+        case 1: strcpy(gen_poly, poly8); break;
+        case 2: strcpy(gen_poly, poly10); break;
+        case 3: strcpy(gen_poly, poly16); break;
+        case 4: strcpy(gen_poly, poly32); break;
+        default: printf("Invalid Choice");
+    }
+
+    printf("\n Generating polynomial is: %s", gen_poly);
+}
+
+void xor(){
+    for (c=1;c<POLYLEN;c++){
+        rem[c] = ((rem[c] == gen_poly[c])?'0':'1');
+    }
+}
+
+void remCal(){
+    for (e=0;e<POLYLEN;e++)
+        rem[e] = data[e];
+    do{
+        if (rem[0] == '1')
+            xor();
+        for (c=0;c<POLYLEN-1;c++)
+            rem[c] = rem[c+1];
+        rem[c] = data[e++];
+    }
+    while (e <= data_len+POLYLEN+1);
+}
+
+void sender(){
+    data_len = strlen(data);
+    for (i=data_len;i<data_len+POLYLEN-1;i++)
+        data[i] = '0';
+    printf("\n \n Modified data is: %s", data);
+    remCal();
+    printf("\n Remainder is: %s", rem);
+    for (i=data_len;i<data_len+POLYLEN-1;i++)
+        data[i] = rem[i-data_len];
+    printf("\n Final codeword being transmitted is: %s", data);
+}
+
+int checkError(){
+    remCal();
+    for (i=0;(i<POLYLEN-1) && (rem[i] != '1'); i++);
+    if (i<POLYLEN-1)
+        printf("\n Error detected data processing aborted");
+    else
+        printf("\n No error detected proceed to data processing");
+    return 0;
+}
+
+void receiver(){
+    printf("\n Code received"
+            "\n Press 0 to detect error"
+            "\n Press 1 to introduce errors: ");
+    scanf("%d", &ch);
+    if (ch == 0)
+        checkError();
+    else if (i == 1){
+        do{
+            do{
+                printf("\n Enter the position where error is to be inserted: ");
+                scanf("%d", &i);
+            }
+            while (i==0||i>data_len+POLYLEN-1);
+            data[i-1] = (data[i-1]=='0')?'1':'0';
+            printf("\n Press 1 to introduce more errors"
+                    "\n Press 0 to continue"
+                    "\n Option: ");
+            scanf("%d", &ch);
+        }
+        while(ch==1);
+        printf("\n Data at receiver: %s", data);
+        checkError();
+    }
+    else{
+        printf("\n Invalid Option");
+    }
+}
+
+int main(){
+    int data_size;
+    printf("\n Enter the data size (max 32 bits)");
+    scanf("%d", &data_size);
+    printf("\n Enter the %d-bit data: ", data_size);
+    scanf("%s", data);
+    chooseGeneratingPolynomial();
+    sender();
+    receiver();
+    return 0;
+}
+
+input 
+Enter the data size (max 32 bits)10101010
+
+ Enter the 10101010-bit data: 1010111
+
+ Press 1 for CRC-8
+ Press 2 for CRC-10
+ Press 3 for CRC-16
+ Press 4 for CRC-32
+ Choice: 4
+---------------------------------------------------------------------
+LAB 3 NEIGHBOUR TABLE DETERMINATION
+---------------------------------------------------------------------
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+
+int i, j, n;
+int x[15], y[15];
+float distance[15][15];
+
+void createNetwork() {
+	int xRange, yRange;
+	printf("Enter the number of nodes(max 15) ");
+	scanf("%d", &n);
+	printf("Enter X coordinate range: ");
+	scanf("%d", &xRange);
+	printf("Enter Y coordinate range: ");
+	scanf("%d", &yRange);
+	srand(time(NULL));
+	for (i = 0; i < n; i++) {
+		x[i] = 1 + rand() % xRange;
+		y[i] = 1 + rand() % yRange;
+	}
+	printf("\nX\tY\t\n");
+	for (i = 0; i < n; i++) {
+		printf("(%d,\t%d)\n", x[i], y[i]);
+	}
+}
+
+void computeDistance() {
+	for (i = 0; i < n; i++) 
+		for (j = 0; j < n; j++) 
+			distance[i][j] = sqrt((x[j] - x[i]) * (x[j] - x[i])
+				+ ((y[j] - y[i]) * (y[j] - y[i])));
+		for (i = 0; i < n; i++)
+			printf("\t%d\t", i+1);
+		printf("\n");
+		for (i = 0; i < n; i++) {
+			printf("%d\t", i+1);
+			for(j = 0; j < n; j++) 
+				printf("%f\t", distance[i][j]);
+				printf("\n"); 
+	}
+}
+
+void findNeighbor() {
+	float range;
+	printf("\nEnter the neighbor range: ");
+	scanf("%f", &range);
+	for (int i = 0; i < n; i++) {
+		printf("\nNeighbors of %d are:\t", i + 1);
+		for (int j = 0; j < n; j++) {
+			if (i == j)
+				continue;
+
+			if (range >= distance[i][j])
+				printf("%d:%f\t", j + 1, distance[i][j]);
+		}
+		printf("\n");
+	}
+}
+
+int main() {
+	createNetwork();
+	computeDistance();
+	findNeighbor();
+	return (EXIT_SUCCESS);
+}
+			
+
+input 
+Enter the number of nodes(max 15) 10
+Enter X coordinate range: 50
+Enter Y coordinate range: 10
+
+Enter the neighbor range: 20
+
+
+---------------------------------------------------------------------
+LAB 4 DISTANCE VECTOR ROUTING
+---------------------------------------------------------------------
+
+
+#include <stdio.h>
+
+int findShortestPath(int G[6][6], int Vertices, int Edges, int edge[20][2], int Source) {
+
+	int i, j, u, v, k, distance [20], parent [20], flag=1;
+	
+	for(i = 0; i<Vertices; i++) {
+		distance[i]=999;
+		parent[i] = -1;
+	}
+	distance[Source-1]=0;
+
+	for(i=0; i<Vertices-1; i++){
+		for(k = 0; k<Edges; k++){
+			u=edge[k][0], v = edge [k][1]; 
+			if (distance[u] + G[u][v] < distance [v]){
+				distance[v]=distance[u]+G[u][v]; 
+				parent[v]=u;
+			}
+		}
+	}
+
+	for(k = 0; k<Edges; k++){
+		u=edge[k][0], v = edge [k][1]; 
+		if (distance[u] + G[u][v] < distance [v]){
+			distance[v]=distance[u]+G[u][v]; 
+			parent[v]=u;
+		}
+	}
+
+	printf("Destination\tcost\tpath\n");
+	if(flag) {
+		for( i = 0; i<Vertices; i++) { 
+			int nodes [10], b = 9 , next; 
+			nodes[b--]=i; 
+			next=parent[i]; 
+			nodes [b--]=next;
+
+			while(next!=-1){
+				next = parent[next];
+				nodes [b--]=next;
+			}
+			if(distance[i] == 999){
+				printf("\n%d\t\t%d\t",i,nodes [-1]);
+			}
+			else{
+				printf("\n%d\t\t%d\t", i, distance[i]);
+			}
+			for(int h=10;h>0;h--){
+				if (nodes [h] == -1){
+					for(int g=h+1; g<10; g++) {
+						if(g==9){
+							printf("%d", nodes [g]);
+						}
+						else{
+							printf("%d-->", nodes [g]);
+						}
+					}
+					break;
+				}
+			}
+		}
+		return flag;
+	}
+}
+
+int main() {
+	int Vertices=6, edge[20][2];
+	int i,j,k=0;
+	int graph [6][6]={{0,1,5,0,0,0}, {1,0,3,4,0,0}, {5,3,0,5,9,0}, {0,4,5,0,2,6}, {0,0,9,2,0,3}, {0,0,0,6,3,0}};
+	printf("The Adjacency Matrix representation of graph\n");
+	
+	for(i=0; i<Vertices; i++) {
+		for(j=0; j<Vertices; j++) {
+			printf("%d\t", graph[i][j]);
+			if(graph[i][j] != 0) {
+				edge[k][0]=i, edge[k][1]=j;
+				k++;
+			}
+		}
+		printf("\n");
+	}
+	
+	for (int i=0; i<Vertices; i++) {
+		printf("\n-----\n"
+		"\tSource vertex %d\n", i); 
+		findShortestPath (graph, Vertices, k, edge, i+1); 
+	}
+
+	return 0;
+}
+			
+---------------------------------------------------------------------
+LAB 5 ARQ MECHANISM 
+---------------------------------------------------------------------
+//all  transmission protocols
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(){
+  int val;
+  while(1){
+    printf("1. Stop and Wait Protocol\n"
+    "2. Go back N Protocol\n"
+    "3. Selective Repeat Protocol\n"
+    "Select one: ");
+    scanf("%d", &val);
+    switch(val){
+      case 1: stopAndWait(); break;
+      case 2: goBackN(); break;
+      case 3: selectiveRepeat(); break;
+      default: return(0);
+    }
+  }
+  return(0);
+}
+
+void stopAndWait(){
+  int totalFrames, receivedFrame, i = 0;
+  printf("Enter the total number of frames: ");
+  scanf("%d", &totalFrames);
+  
+  while(i != totalFrames){
+    printf("\nEnter received frame: ");
+    scanf("%d", &receivedFrame);
+    
+    if (receivedFrame == i+1){
+      printf("Transmitting.... ACK to frame %d\n", receivedFrame);
+      i++;
+    }
+    else{
+      printf("Negative ACK.... to frame %d\n", i+1); // Added newline character
+    }
+  }
+}
+
+
+void goBackN(){
+  int windowSize, sent = 0, ack, i;
+  printf("Enter window size: ");
+  scanf("%d", &windowSize);
+  
+  while(1){
+    for(i = 0; i < windowSize; i++){
+      printf("Frame %d has been transmitted.\n", sent);
+      sent++;
+      if(sent == windowSize)
+        break;
+    }
+    printf("\nPlease enter the last Acknowledgement received: ");
+    scanf("%d", &ack);
+    
+    if(ack == windowSize)
+      break;
+    else
+      sent = ack;
+  }
+}
+
+
+void selectiveRepeat(){
+  int totalFrames, receivedFrames, frame, i, j;
+  printf("Enter the total number of frames: ");
+  scanf("%d", &totalFrames);
+  
+  printf("Sending frames: ");
+  for(i = 0; i < totalFrames; i++){
+    printf("%d ", i+1);
+  }
+  
+  printf("\nEnter the number of frames received: ");
+  scanf("%d", &receivedFrames);
+  
+  int received[totalFrames];
+  printf("\nEnter received frames: ");
+  for(i = 0; i < receivedFrames; i++){
+    scanf("%d", &received[i]);
+  }
+  
+  printf("Retransmitting missing frames: ");
+  for(i = 0; i < totalFrames; i++){
+    int found = 0;
+    for(j = 0; j < receivedFrames; j++){
+      if(received[j] == i+1){
+        found = 1;
+        break;
+      }
+    }
+    if(!found){
+      printf("%d ", i+1);
+    }
+  }
+}
+
+input 
+Enter: 
+1. Stop and wait protocol
+2. Go back N
+3. Selective repeat
+1
+Enter the total number of frames: 5
+
+Enter received frame: 1
+Transmitting.....ACK to frame 1
+
+Enter received frame: 3
+Negative ACK...to frame 2
+
+Enter received frame: 2
+Transmitting.....ACK to frame 2
+
+Enter received frame: 3
+Transmitting.....ACK to frame 3
+
+Enter received frame: 5
+Negative ACK...to frame 4
+
+Enter received frame: 5
+Negative ACK...to frame 4
+
+Enter received frame: 4
+Transmitting.....ACK to frame 4
+
+Enter received frame: 5
+Transmitting.....ACK to frame 5
+
+Enter: 
+1. Stop and wait protocol
+2. Go back N
+3. Selective repeat
+2
+Enter the total number of frames: 5
+Enter window size of frames: 3
+Sending frames: 1, 2, 3, 
+Is Frame 1 is received (1 or 0)?1
+
+Sending ACK to frame 1
+Sliding window
+In window 2 3 4 
+Is Frame 2 is received (1 or 0)?1
+
+Sending ACK to frame 2
+Sliding window
+In window 3 4 5 
+Is Frame 3 is received (1 or 0)?1
+
+Sending ACK to frame 3
+Sliding window
+In window 4 5 
+Is Frame 4 is received (1 or 0)?0
+
+Retransmitting frames: 4, 5, 
+Is Frame 4 is received (1 or 0)?1
+
+Sending ACK to frame 4
+Sliding window
+In window 5 
+Is Frame 5 is received (1 or 0)?1
+
+Sending ACK to frame 5
+Sliding window
+In window 
+Enter: 
+1. Stop and wait protocol
+2. Go back N
+3. Selective repeat
+3
+Enter the total number of frames: 10
+Sending frames: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+Enter the number of frames received: 4
+
+Enter received frame
+2
+8
+1
+3
+Retransmitting frame: 4
+Retransmitting frame: 5
+Retransmitting frame: 6
+Retransmitting frame: 7
+Retransmitting frame: 9
+Retransmitting frame: 10
+
+Sorting 1 2 3 4 5 6 7 8 9 10 
+Enter: 
+1. Stop and wait protocol
+2. Go back N
+3. Selective repeat
+
+---------------------------------------------------------------------
+LAB 6 SOCKET PROGRAMMING - 1
+---------------------------------------------------------------------
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//SERVER.TXT
+import socket
+
+HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.bind((HOST, PORT))
+    s.listen()
+    conn, addr = s.accept()
+    with conn:
+        print('Connected by', addr)
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                break
+            conn.sendall(data)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//CLIENT.TXT
+import socket
+
+HOST = '127.0.0.1'  # The server's hostname or IP address
+PORT = 65432        # The port used by the server
+message = b"Hello World"
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.connect((HOST, PORT))
+    s.send(message)	
+    data = s.recv(1024)
+
+print('Received', repr(data))
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+_____________________________________________________________________
+//OPEN 2 CMD'S simultaneously and don't close them
+
+1ST CMD                            2ND CMD
+1.1>>cd desktop
+1.2>>python server.txt
+                                   2.1>>cd desktop
+                                   2.2>>python client.txt
+
+_____________________________________________________________________
+
+---------------------------------------------------------------------
+LAB 7 CREATING A TCP SOCKET-BASED CHATROOM
+---------------------------------------------------------------------
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//CHAT_SERVER.TXT
+import time, socket, sys
+print('Setup Server...')
+time.sleep(1)
+#Get the hostname, IP Address from socket and set Port
+soc = socket.socket()
+host_name = socket.gethostname()
+ip = socket.gethostbyname(host_name)
+port = 1234
+soc.bind((host_name, port))
+print(host_name, '({})'.format(ip))
+name = input('Enter name: ')
+soc.listen(1) #Try to locate using socket
+print('Waiting for incoming connections...')
+connection, addr = soc.accept()
+print("Received connection from ", addr[0], "(", addr[1], ")\n")
+print('Connection Established. Connected From: {}, ({})'.format(addr[0], addr[0]))
+#get a connection from client side
+client_name = connection.recv(1024)
+client_name = client_name.decode()
+print(client_name + ' has connected.')
+print('Press [bye] to leave the chat room')
+connection.send(name.encode())
+while True:
+    message = input('Me > ')
+    if message == '[bye]':
+        message = 'Bye, leaving the chat room!'
+        connection.send(message.encode())
+        print("\n")
+        break
+    connection.send(message.encode())
+    message = connection.recv(1024)
+    message = message.decode()
+    print(client_name, '>', message)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//CHAT_CLIENT.TXT
+import time, socket, sys
+print('Client Server...')
+time.sleep(1)
+#Get the hostname, IP Address from socket and set Port
+soc = socket.socket()
+shost = socket.gethostname()
+ip = socket.gethostbyname(shost)
+#get information to connect with the server
+print(shost, '({})'.format(ip))
+server_host = input('Enter server\'s IP address:')
+name = input('Enter Client\'s name: ')
+port = 1234
+print('Trying to connect to the server: {}, ({})'.format(server_host, port))
+time.sleep(1)
+soc.connect((server_host, port))
+print("Connected...\n")
+soc.send(name.encode())
+server_name = soc.recv(1024)
+server_name = server_name.decode()
+print('{} has joined...'.format(server_name))
+print('Enter [bye] to exit.')
+while True:
+    message = soc.recv(1024)
+    message = message.decode()
+    print(server_name, ">", message)
+    message = input("Me > ")
+    if message == "[bye]":
+        message = "Leaving the Chat room"
+        soc.send(message.encode())
+        print("\n")
+        break
+    soc.send(message.encode())
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+_____________________________________________________________________
+//OPEN 2 CMD'S SIMULTANEOUSLY and don't close them
+
+1ST CMD(server's cmd)               2ND CMD(client's cmd)
+1.1>>cd desktop
+1.2>>python chat_server.txt
+1.3>>sam
+                                    2.1>>cd desktop
+                                    2.2>>python chat_client.txt
+                                    //put server's ip address now
+                                    2.3>>192.168.0.103
+                                    2.4>>tom
+3>>hi                       
+                                    4>>hello
+5>>msruas
+                                    6>>cs
+7>>[bye]
+                                    8>>[bye]
+
+_____________________________________________________________________
+
